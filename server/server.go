@@ -10,12 +10,6 @@ import (
 	"time"
 )
 
-//type Server struct {
-//	Address string
-//	Mux gin.Context
-//	Server *http.Server
-//}
-
 type Server struct {
 	Mux *gin.Engine
 	Port string
