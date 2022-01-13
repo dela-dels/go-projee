@@ -13,8 +13,12 @@ func main(){
 	godotenv.Load()
 
 	setupDatabaseSystem()
+	setupWebServer()
+}
 
+func setupWebServer() {
 	webServer := server.New()
+
 	if err := webServer.Start(); err != nil {
 		fmt.Errorf("unable to start server: %w", err)
 	}
@@ -23,6 +27,7 @@ func main(){
 func setupDatabaseSystem() {
 	database := database.New()
 	connection, err := database.Connect()
+
 	if err != nil {
 		log.Fatalf("Failed to start and connect to database server. Error: %v", err)
 	}

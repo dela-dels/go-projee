@@ -10,7 +10,6 @@ import (
 )
 
 type Database struct {
-	//DB *gorm.DB
 	Host     string
 	Port     int
 	User     string
@@ -57,7 +56,3 @@ func (database Database) databaseSourceName() string {
 	//username:password@protocol(address)/dbname?param=value
 	return fmt.Sprintf("%v:@tcp(%v:%v)/%v?charset=utf8mb4&parseTime=True&loc=Local", database.User, database.Host, database.Port, database.Name)
 }
-
-//func (database *Database) RunMigrations(connection *gorm.DB, p *models.Project, s *models.Sprint, t *models.Task, u *models.User, u2 *models.UserTasks) interface{} {
-//
-//}
