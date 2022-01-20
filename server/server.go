@@ -18,6 +18,7 @@ type Server struct {
 
 func New() *Server {
 	mux := gin.Default()
+	mux.Use(headers())
 	port := os.Getenv("APP_PORT")
 
 	return &Server{
@@ -62,5 +63,15 @@ func (s *Server) Stop() error {
 	}
 
 	return nil
+}
+
+func headers() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Content-Type", "application/json")
+		c.Writer.Header().Set("Cache-Control", "no-cache")
+		c.Writer.Header().Set("Connection", "keep-alive")
+		c.Writer.Header().Set("Accept", "application/json")
+		c.Next()
+	}
 }
 

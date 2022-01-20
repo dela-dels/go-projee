@@ -1,14 +1,15 @@
 package server
 
 import (
-	"github.com/gin-gonic/gin"
-	"net/http"
+	"github.com/dela-dels/go-projee/handlers"
+	"github.com/dela-dels/go-projee/handlers/projects"
 )
 
 func (s *Server) setupRoutes() {
-	s.Mux.GET("/test", func(context *gin.Context) {
-		context.JSON(http.StatusOK, gin.H{
-			"name": "Dela Akakpo",
-		})
-	})
+	s.Mux.GET("/ping", handlers.Ping)
+
+	s.Mux.POST("login", handlers.Login)
+	s.Mux.POST("register", handlers.Register)
+
+	s.Mux.POST("/projects", projects.Create)
 }
