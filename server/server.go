@@ -4,15 +4,16 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	Mux *gin.Engine
-	Port string
+	Mux    *gin.Engine
+	Port   string
 	Server *http.Server
 }
 
@@ -22,15 +23,15 @@ func New() *Server {
 	port := os.Getenv("APP_PORT")
 
 	return &Server{
-		Mux:     mux,
+		Mux:  mux,
 		Port: port,
-		Server:  &http.Server{
-			Addr: port,
-			Handler: mux,
-			ReadTimeout: 5 * time.Second,
+		Server: &http.Server{
+			Addr:              port,
+			Handler:           mux,
+			ReadTimeout:       5 * time.Second,
 			ReadHeaderTimeout: 5 * time.Second,
-			WriteTimeout: 5 * time.Second,
-			IdleTimeout: 5 * time.Second,
+			WriteTimeout:      5 * time.Second,
+			IdleTimeout:       5 * time.Second,
 			TLSConfig: &tls.Config{
 				CurvePreferences: []tls.CurveID{
 					tls.CurveP256,
@@ -46,7 +47,8 @@ func (s *Server) Start() error {
 
 	fmt.Println("Starting server on port", s.Port)
 	if err := s.Server.ListenAndServe(); err != nil {
-		return fmt.Errorf("error starting the server. error: %w", err)
+		return err
+		// return fmt.Errorf("error starting the server. error: %w", err)
 	}
 
 	return nil
@@ -55,11 +57,11 @@ func (s *Server) Start() error {
 func (s *Server) Stop() error {
 	fmt.Println("Attempting to stop server")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	if err := s.Server.Shutdown(ctx); err != nil {
-		return  fmt.Errorf("error shutting down the server. Error: %w", err)
+		return fmt.Errorf("error shutting down the server. Error: %w", err)
 	}
 
 	return nil
@@ -74,4 +76,3 @@ func headers() gin.HandlerFunc {
 		c.Next()
 	}
 }
-

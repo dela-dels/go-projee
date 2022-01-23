@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/dela-dels/go-projee/models"
 	"github.com/dela-dels/go-projee/server"
 	"github.com/dela-dels/go-projee/storage/database"
 	"github.com/joho/godotenv"
-	"log"
 )
 
 func main() {
@@ -20,17 +21,21 @@ func setupWebServer() {
 	webServer := server.New()
 
 	if err := webServer.Start(); err != nil {
-		fmt.Errorf("unable to start server: %w", err)
+		log.Fatalf("Unable to start server: %v", err)
 	}
 }
 
 func setupDatabaseSystem() {
 	database := database.New()
+	fmt.Printf("database %v", database)
 	connection, err := database.Connect()
 
 	if err != nil {
 		log.Fatalf("Failed to start and connect to database server. Error: %v", err)
 	}
 
-	database.RunMigrations(connection, &models.Project{}, &models.Sprint{}, &models.Task{}, &models.User{}, &models.UserTasks{})
+	if err := database.RunMigrations(connection, &models.Project{}, &models.Sprint{}, &models.Task{}, &models.User{}, &models.UserTasks{}); err != nil {
+		log.Fatalf("Failed to run migrations. Error: %v", err)
+	}
+
 }

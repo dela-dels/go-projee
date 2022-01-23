@@ -2,11 +2,12 @@ package database
 
 import (
 	"fmt"
+	"os"
+	"strconv"
+
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"os"
-	"strconv"
 )
 
 type Database struct {
@@ -35,7 +36,7 @@ func New() *Database {
 func (database *Database) Connect() (*gorm.DB, error) {
 	database.Log.Info("Connecting to database with dsn:", zap.String("dsn", database.databaseSourceName()))
 
-	con, err := gorm.Open(mysql.Open(database.databaseSourceName()), &gorm.Config{})
+	con, err := gorm.Open(mysql.Open("root:@tcp(127.0.0.1:3306)/go_projee?charset=utf8mb4&parseTime=True&loc=Local"), &gorm.Config{})
 
 	if err != nil {
 		return nil, err
@@ -51,7 +52,7 @@ func (database *Database) RunMigrations(connection *gorm.DB, models ...interface
 	return err
 }
 
-func (database Database) databaseSourceName() string {
+func (database *Database) databaseSourceName() string {
 	//the format for the database source name values are represented below
 	//username:password@protocol(address)/dbname?param=value
 	return fmt.Sprintf("%v:@tcp(%v:%v)/%v?charset=utf8mb4&parseTime=True&loc=Local", database.User, database.Host, database.Port, database.Name)
