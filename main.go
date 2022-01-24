@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/dela-dels/go-projee/models"
@@ -27,7 +26,6 @@ func setupWebServer() {
 
 func setupDatabaseSystem() {
 	database := database.New()
-	fmt.Printf("database %v", database)
 	connection, err := database.Connect()
 
 	if err != nil {

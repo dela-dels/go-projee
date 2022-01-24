@@ -9,6 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+//TODO: will probably use the go-validator package to create a custom unique-email validation where we throw a custom error for duplicate errors
 type RegistrationRequest struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
@@ -29,10 +30,34 @@ type UserDetails struct {
 }
 
 func Login(context *gin.Context) {
+	//get the user's credentials from the request
+	//retrieve the users's data from storage matching the credentials sent
+	//generate a jwt token for the user trying to authenticate
+	var loginRequest LoginRequest
+
+	if err := context.BindJSON(&loginRequest); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"status": "Failed",
+			"message": "Unable to process your request. Please try again and make sure you are sending the right data",
+		})
+		return
+	}
+
+	user := models.User{}
+	err := db.Where("email = ?", loginRequest.Email).First(&user).Error
+
+	if err != nil {
+		context.JSON(404, gin.H{
+			"status": "Failed",
+			"error": err.Error(),
+		})
+	}
+
 	context.JSON(http.StatusOK, gin.H{
 		"status":  "Success",
-		"message": "Login Route",
+		"message": &user,
 	})
+	return
 }
 
 var db, _ = database.New().Connect()
@@ -67,7 +92,7 @@ func Register(context *gin.Context) {
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"status": "Failed",
-			"error":  "Operation Failed. Please contact support for assistance",
+			"error":  err.Error(),
 		})
 		return
 	}
