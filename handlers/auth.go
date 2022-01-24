@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/dela-dels/go-projee/models"
@@ -8,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 )
+
+var db, _ = database.New().Connect()
 
 //TODO: will probably use the go-validator package to create a custom unique-email validation where we throw a custom error for duplicate errors
 type RegistrationRequest struct {
@@ -37,7 +40,7 @@ func Login(context *gin.Context) {
 
 	if err := context.BindJSON(&loginRequest); err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"status": "Failed",
+			"status":  "Failed",
 			"message": "Unable to process your request. Please try again and make sure you are sending the right data",
 		})
 		return
@@ -49,18 +52,32 @@ func Login(context *gin.Context) {
 	if err != nil {
 		context.JSON(404, gin.H{
 			"status": "Failed",
-			"error": err.Error(),
+			"error":  err.Error(),
 		})
+		return
+	}
+
+	log.Printf("user password %s and request password %s", user.Password, loginRequest.Password)
+
+	err = hashMatchesPassword(user.Password, loginRequest.Password)
+
+	log.Printf("hash pass check error is: %s", err)
+
+	if err != nil {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{
+			"status": "Failed",
+			"error":  "Invalid credentials. Please check and try again.",
+			"res": err.Error(),
+		})
+		return
 	}
 
 	context.JSON(http.StatusOK, gin.H{
 		"status":  "Success",
-		"message": &user,
+		"message": user,
 	})
 	return
 }
-
-var db, _ = database.New().Connect()
 
 func Register(context *gin.Context) {
 	var registrationRequest RegistrationRequest
@@ -73,20 +90,13 @@ func Register(context *gin.Context) {
 		})
 	}
 
-	password, _ := hashPassword(context.Param("password"))
-
-	userDetails := UserDetails{
-		registrationRequest.Email,
-		registrationRequest.Firstname,
-		registrationRequest.Lastname,
-		password,
-	}
+	password, _ := hashPassword(registrationRequest.Password)
 
 	err := db.Create(&models.User{
-		FirstName: userDetails.FirstName,
-		LastName:  userDetails.Lastname,
-		Email:     userDetails.Email,
-		Password:  userDetails.Password,
+		FirstName: registrationRequest.Firstname,
+		LastName:  registrationRequest.Lastname,
+		Email:     registrationRequest.Email,
+		Password:  password,
 	}).Error
 
 	if err != nil {
@@ -99,11 +109,17 @@ func Register(context *gin.Context) {
 
 	context.JSON(http.StatusOK, gin.H{
 		"status": "Success",
-		"user":   userDetails,
+		"user":   err,
 	})
+	return
 }
 
 func hashPassword(password string) (string, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(hashedPassword), err
+}
+
+func hashMatchesPassword(hashedPassword, password string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	return err
 }

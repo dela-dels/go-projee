@@ -8,7 +8,7 @@ type User struct {
 	FirstName string `gorm:"not null"`
 	LastName  string `gorm:"not null"`
 	Email     string `gorm:"type:varchar(200);uniqueIndex;not null" json:"email"`
-	Password  string `gorm:"not null;-"`
+	Password  string `gorm:"not null"`
 }
 
 //func (user *User) FindByEmail(email string) (*User, error) {
