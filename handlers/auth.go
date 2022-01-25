@@ -34,9 +34,6 @@ type UserDetails struct {
 }
 
 func Login(context *gin.Context) {
-	//get the user's credentials from the request
-	//retrieve the users's data from storage matching the credentials sent
-	//generate a jwt token for the user trying to authenticate
 	var loginRequest LoginRequest
 
 	if err := context.BindJSON(&loginRequest); err != nil {

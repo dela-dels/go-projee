@@ -35,3 +35,11 @@ func Create(context *gin.Context) {
 		"data":   project,
 	})
 }
+
+func Index(context *gin.Context) {
+	email := context.Param("email")
+	context.JSON(http.StatusOK, gin.H{
+		"status":   "Success",
+		"projects": email,
+	})
+}
