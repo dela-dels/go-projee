@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
+
+	"github.com/dela-dels/go-projee/utils"
 
 	"github.com/dela-dels/go-projee/models"
 	"github.com/dela-dels/go-projee/storage/database"
@@ -52,31 +53,34 @@ func Login(context *gin.Context) {
 	if err != nil {
 		context.JSON(404, gin.H{
 			"status": "Failed",
-			"error":  err.Error(),
+			"error":  "Sorry, your credentials do not match any of our records",
 		})
 		return
 	}
 
-	log.Printf("user password %s and request password %s", user.Password, loginRequest.Password)
-
 	err = hashMatchesPassword(user.Password, loginRequest.Password)
-
-	log.Printf("hash pass check error is: %s", err)
 
 	if err != nil {
 		context.JSON(http.StatusUnprocessableEntity, gin.H{
 			"status": "Failed",
 			"error":  "Invalid credentials. Please check and try again.",
-			"res": err.Error(),
 		})
 		return
 	}
 
+	token, err := utils.GenerateToken(user)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "Failed",
+			"message": "Unable to process your request. Please try again in a few minutes.",
+		})
+	}
+
 	context.JSON(http.StatusOK, gin.H{
-		"status":  "Success",
-		"message": user,
+		"status": "Success",
+		"user":   user,
+		"token":  token,
 	})
-	return
 }
 
 func Register(context *gin.Context) {

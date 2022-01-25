@@ -2,7 +2,9 @@
   <dictionary name="delaakakpo">
     <words>
       <w>akakpo</w>
+      <w>firstname</w>
       <w>gorm</w>
+      <w>lastname</w>
       <w>projee</w>
     </words>
   </dictionary>
